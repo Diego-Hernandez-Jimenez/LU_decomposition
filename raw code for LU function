@@ -1,0 +1,58 @@
+import numpy as np
+
+def LU_decomp(A,n):
+    startentry = 0
+    U = A.copy()
+    L = np.identity(n)
+                    
+    for col in range(n - 1): # (if A is n x n) from col 0 to col n-1
+        startentry += 1 
+        for row in range(startentry,n): # from row 1 to row n in the first col,
+            multiplier = -U[row,col]/U[col,col]  # from row 2 to row n in the second col ...
+            U[row] = U[row] + multiplier * U[col]
+            L[row,col] = -multiplier
+            
+    return L,U
+    
+   #-------------------------------
+   
+    def solve_with_LU(L,U,b,n):
+    
+    y = np.zeros(n)
+    for i in range(len(y)):
+        y[i] = (b[i] - np.sum([L[i,j]*y[j] for j in range(n)]))/L[i,i]
+        
+    x = np.zeros(n)
+    for i in range(len(x)-1,-1,-1):
+        x[i] = (y[i] - np.sum([U[i,j]*x[j] for j in range(n)]))/U[i,i]
+        
+    return x
+    
+    #-------------------------------
+    
+    def LU(A, b = None):
+    """performs LU decomposition and/or solves the linear system Ax=b
+    
+    Parameters
+    ----------
+    A : 2-D n by n numpy array (n by n matrix)
+        Square matrix to be decomposed.
+    b : 1-D numpy array
+        Optional vector.
+
+    Returns
+    -------
+    tuple.
+        Two element tuple containing the lower triangular matrix and
+        the upper triangular matrix: (L,U).
+        
+    numpy array.
+        If the only interest is to solve a given linear system Ax=b,
+        the solution vector x is returned after applying the LU decomposition."""
+    
+    if A.shape[0] != A.shape[1]: return 'LU decomposition works with square matrices'
+    
+    n = A.shape[0]
+    decomp_mats = LU_decomp(A,n)
+    if b is None: return decomp_mats
+    else: return solve_with_LU(decomp_mats[0],decomp_mats[1],b,n)
